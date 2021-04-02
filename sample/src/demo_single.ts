@@ -59,47 +59,72 @@ const documentLoader: any = extendContextLoader(customDocLoader);
 const main = async (): Promise<void> => {
   //Import the example key pair
   const keyPair = await new Bls12381G2KeyPair(keyPairOptions);
-
+  // console.log(JSON.stringify(keyPair, null, 2));
+  console.log(`key id: ${keyPair.id}`);
+  console.log(`Private key: ${keyPair.privateKey}`);
+  console.log(`Public key: ${keyPair.publicKey}`);
+  console.log(`===================================================`);
   console.log("Input document");
-  console.log(JSON.stringify(inputDocument, null, 2));
+  console.log(inputDocument);
+  // console.log(JSON.stringify(inputDocument, null, 2));
+  console.log(`===================================================`);
 
   //Sign the input document
   const signedDocument = await sign(inputDocument, {
     suite: new BbsBlsSignature2020({ key: keyPair }),
     purpose: new purposes.AssertionProofPurpose(),
-    documentLoader
+    documentLoader: documentLoader
   });
 
-  console.log("Input document with proof");
-  console.log(JSON.stringify(signedDocument, null, 2));
+  console.log("Input document with Signature");
+  console.log(signedDocument);
+  // console.log(JSON.stringify(inputDocument, null, 2));
+  console.log(`===================================================`);
 
-  //Verify the proof
-  let verified = await verify(signedDocument, {
+  console.log(signedDocument);
+  //Verify the Signature
+  let verifiedSignatureResult = await verify(signedDocument, {
     suite: new BbsBlsSignature2020(),
     purpose: new purposes.AssertionProofPurpose(),
-    documentLoader
+    documentLoader: documentLoader
   });
 
-  console.log("Verification result");
-  console.log(JSON.stringify(verified, null, 2));
+  console.log("Signature verification result");
+  // console.log(verifiedSignatureResult);
+  console.log(JSON.stringify(verifiedSignatureResult, null, 2));
+  console.log(`===================================================`);
 
-  //Derive a proof
-  const derivedProof = await deriveProof(signedDocument, revealDocument, {
+  //create a proof
+  const zkpBBSProof = await deriveProof(signedDocument, revealDocument, {
     suite: new BbsBlsSignatureProof2020(),
-    documentLoader
+    documentLoader: documentLoader
   });
+  console.log("Proof");
+  console.log(zkpBBSProof);
+  // console.log(JSON.stringify(zkpBBSProof, null, 2));
+  console.log(`===================================================`);
 
-  console.log(JSON.stringify(derivedProof, null, 2));
+  // //create a proof
+  // const zkpBBSProof2 = await deriveProof(signedDocument, revealDocument, {
+  //   suite: new BbsBlsSignatureProof2020(),
+  //   documentLoader: documentLoader
+  // });
+  // console.log("Proof 2")
+  // console.log(zkpBBSProof2)
+  // // console.log(JSON.stringify(zkpBBSProof, null, 2));
+  // console.log(`===================================================`)
 
-  //Verify the derived proof
-  verified = await verify(derivedProof, {
+  //Verify the proof
+  let verifiedProofResult = await verify(zkpBBSProof, {
     suite: new BbsBlsSignatureProof2020(),
     purpose: new purposes.AssertionProofPurpose(),
-    documentLoader
+    documentLoader: documentLoader
   });
 
-  console.log("Verification result");
-  console.log(JSON.stringify(verified, null, 2));
+  console.log("BBS+ Zero knowledge proof verification result");
+  // console.log(verifiedProofResult);
+  console.log(JSON.stringify(verifiedProofResult, null, 2));
+  console.log(`===================================================`);
 };
 
 main();
